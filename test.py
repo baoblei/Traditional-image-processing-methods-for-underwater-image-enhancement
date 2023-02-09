@@ -8,7 +8,7 @@ cap = cv2.VideoCapture(0)
 # cap = cv2.VideoCapture('./video/uw4.mp4')
 
 # 获取原始视频帧大小及fps信息，注意宽高需要强制类型转换成int，否则VideoWriter会报错
-width = int(cap.get(3)/2)
+width = int(cap.get(3))
 height = int(cap.get(4))
 fps = 24
 # 根据视频文件属性设置waitTime和fps
@@ -25,7 +25,7 @@ frame2gray = np.zeros((height, width, 3), np.uint8)
 # times = []
 while 1:
     ret, frame = cap.read()
-    frame = frame[:,:640]
+    frame = frame[:320,:320]
     if frame is None:
         break
     else:
@@ -56,7 +56,7 @@ while 1:
         cv2.imshow("enhance", enhance)
 
         # 局部直方图均衡
-        clahe = cv2.createCLAHE(clipLimit = 2.0, tileGridSize=(8,8))
+        clahe = cv2.createCLAHE(clipLimit = 1.0, tileGridSize=(8,8))
         # local_eqH_bg = clahe.apply(bH_g)
         # local_eqH_gg = clahe.apply(gH_g)
         # local_eqH_rg = clahe.apply(rH_g)
@@ -84,6 +84,14 @@ while 1:
         enh_DCP = deHaze(frame/255.0)
         cv2.imshow("DCP_enhance", enh_DCP)
         # out.write(enh_DCP)
+
+        # 中值滤波
+        median = cv2.medianBlur(frame, 5)
+        cv2.imshow("median", median)
+
+        # 高斯滤波
+        dst = cv2.GaussianBlur(local_enhance,(5,5),cv2.BORDER_DEFAULT)
+        cv2.imshow("GaussianBlur", dst)
 
         k = cv2.waitKey(waitTime) & 0xFF
         if k == 27:
